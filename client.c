@@ -8,7 +8,6 @@
 
 #include <sys/socket.h> 
 
-#define NBCORE 8
 
 struct stats{
   char cpu[4];
@@ -81,21 +80,33 @@ int main(int argc, char **argv){
   
 
 /// STAT  
+  
+  int zero,nbcore;
+  FILE *fd=fopen("/sys/devices/system/cpu/present","r");
+  if(!fd)
+    return 1;
 
+  ret = fscanf(fd, "%d-%d", &zero, &nbcore);
+  if(ret!=2)
+    perror("fscanf");
+  
+  nbcore++;
+  
   int prevIdle, currIdle, prevNonIdle, currNonIdle, prevTotal, currTotal, total, idled;
-  double percentage;
 
-  struct stats prev[9];
-  struct stats current[9];
+  //nbcore + 1 for CPU Global
+  struct stats prev[nbcore+1];
+  struct stats current[nbcore+1];
+  double percentage[nbcore+1];
 
   while(1){
     memset(&prev, 0, sizeof(prev));
     memset(&current, 0, sizeof(current));
 
-    FILE *fd=fopen("/proc/stat","r");
+    fd=fopen("/proc/stat","r");
     if(!fd)
       return 1;
-    for(int i=0; i < NBCORE+1; i++){
+    for(int i=0; i < nbcore+1; i++){
       ret = fscanf(fd,"%s %d %d %d %d %d %d %d %d %d %d\n", prev[i].cpu, &prev[i].user, &prev[i].nice, &prev[i].system, &prev[i].idle, &prev[i].iowait, &prev[i].irq, &prev[i].softirq, &prev[i].steal, &prev[i].guest, &prev[i].guest_nice);
       if(ret!=11)
         perror("fscanf");
@@ -108,7 +119,7 @@ int main(int argc, char **argv){
     fd=fopen("/proc/stat","r");
     if(!fd)
       return 1;
-    for(int i=0; i < NBCORE+1; i++){
+    for(int i=0; i < nbcore+1; i++){
       ret = fscanf(fd,"%s %d %d %d %d %d %d %d %d %d %d\n", current[i].cpu, &current[i].user, &current[i].nice, &current[i].system, &current[i].idle, &current[i].iowait, &current[i].irq, &current[i].softirq, &current[i].steal, &current[i].guest, &current[i].guest_nice);
       if(ret!=11)
         perror("fscanf");
@@ -119,7 +130,7 @@ int main(int argc, char **argv){
     //printf("%s %d %d %d %d %d %d %d %d %d %d\n", prev[i].cpu, prev[i].user, prev[i].nice, prev[i].system, prev[i].idle, prev[i].iowait, prev[i].irq, prev[i].softirq, prev[i].steal, prev[i].guest, prev[i].guest_nice);
     //printf("%s %d %d %d %d %d %d %d %d %d %d\n", current[i].cpu, current[i].user, current[i].nice, current[i].system, current[i].idle, current[i].iowait, current[i].irq, current[i].softirq, current[i].steal, current[i].guest, current[i].guest_nice);
 
-    for(int i=1; i < NBCORE+1; i++){
+    for(int i=0; i < nbcore+1; i++){
       prevIdle = prev[i].idle + prev[i].iowait;
       currIdle = current[i].idle + current[i].iowait;
 
@@ -132,34 +143,19 @@ int main(int argc, char **argv){
       total = currTotal-prevTotal;
       idled = currIdle-prevIdle;
 
-      percentage = (double)((total-idled))/(double)(total*100);
-      percentage *= 10000;
-
-    
-      printf("CPU%d : %lf%%\n", i, percentage);
-
+      percentage[i] = (double)((total-idled))/(double)(total*100);
+      percentage[i] *= 10000;
     }
-
-    prevIdle = prev[0].idle + prev[0].iowait;
-    currIdle = current[0].idle + current[0].iowait;
-
-    prevNonIdle = prev[0].user + prev[0].nice + prev[0].system + prev[0].irq + prev[0].softirq + prev[0].steal;
-    currNonIdle = current[0].user + current[0].nice + current[0].system + current[0].irq + current[0].softirq + current[0].steal;
-
-    prevTotal = prevIdle+prevNonIdle;
-    currTotal = currIdle+currNonIdle;
-
-    total = currTotal-prevTotal;
-    idled = currIdle-prevIdle;
-
-    percentage = (double)((total-idled))/(double)(total*100);
-    percentage *= 10000;
    
-    printf("CPU_GLOBAL : %lf%%\n", percentage);
 
+  //printf("NB Cores : %d\n", nbcore);
+  for(int i=0; i < nbcore+1; i++){
+    if(i==0)
+      printf("CPU_GLOBAL : %lf%%\n", percentage[i]);
+    printf("CPU%d : %lf%%\n", i, percentage[i]);
+  }
 
-
-    ret = write(sock, (void *)&percentage, sizeof(double));
+    ret = write(sock, (void *)percentage, sizeof(double));
 
     sleep(2);
     ret=system("clear");
