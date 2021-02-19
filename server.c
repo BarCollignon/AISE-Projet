@@ -9,7 +9,24 @@
 #include<sys/socket.h> 
 #include<sys/types.h> 
 
+#include<pthread.h>
 
+
+void *client_loop( void *param ){
+
+  int *client_socket=(int *)param;
+
+  int ret;
+  double *percentage=(double *)malloc(sizeof(double));
+
+  while(1){
+    ret=read(*client_socket, (void *)percentage, sizeof(double));
+    if(ret<=0)
+      perror("read");
+
+    printf("[%d]CPU_GLOBAL : %lf%%\n", *client_socket-3, *percentage);
+  }
+}
 
 //
 int main(int argc, char **argv){
@@ -86,9 +103,9 @@ int main(int argc, char **argv){
 
     *client_socket = cs;
 
-    //pthread_t th;
+    pthread_t th;
 
-    //pthread_create(&th, NULL, client_loop, (void *)infos);
+    pthread_create(&th, NULL, client_loop, (void *)client_socket);
   }
 
 

@@ -8,7 +8,7 @@
 
 #include <sys/socket.h> 
 
-#define NBCORE 3
+#define NBCORE 8
 
 struct stats{
   char cpu[4];
@@ -159,13 +159,11 @@ int main(int argc, char **argv){
 
 
 
+    ret = write(sock, (void *)&percentage, sizeof(double));
+
     sleep(2);
     ret=system("clear");
   }
-
-
-/// SEND STAT IN SOCKET
-
 
 
   close(sock);
