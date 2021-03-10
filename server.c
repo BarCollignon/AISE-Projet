@@ -17,15 +17,25 @@ void *client_loop( void *param ){
   int *client_socket=(int *)param;
 
   int ret;
-  double *percentage=(double *)malloc(sizeof(double));
+
+  int nbcore;
+  ret = read(*client_socket, (void *)&nbcore, sizeof(int));
+
+  double *percentage=(double *)malloc((nbcore+1)*sizeof(double));
 
   while(1){
-    ret=read(*client_socket, (void *)percentage, sizeof(double));
+    for(int i=0; i < nbcore+1; i++)
+      ret=read(*client_socket, (void *)&percentage[i], sizeof(double));
+
     if(ret<=0)
       perror("read");
 
-    printf("[%d]CPU_GLOBAL : %lf%%\n", *client_socket-3, *percentage);
+    printf("[%d]NB Cores : %d\n", *client_socket-3, nbcore);
+    printf("CPU_GLOBAL : %lf%%\n", percentage[0]);
+    for(int i=1; i < nbcore+1; i++)
+      printf("CPU%d : %lf%%\n", i, percentage[i]);
   }
+
 }
 
 //

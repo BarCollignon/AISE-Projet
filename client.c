@@ -91,6 +91,7 @@ int main(int argc, char **argv){
     perror("fscanf");
   
   nbcore++;
+  ret = write(sock, (void *)&nbcore, sizeof(int));
   
   int prevIdle, currIdle, prevNonIdle, currNonIdle, prevTotal, currTotal, total, idled;
 
@@ -146,16 +147,15 @@ int main(int argc, char **argv){
       percentage[i] = (double)((total-idled))/(double)(total*100);
       percentage[i] *= 10000;
     }
-   
 
-  //printf("NB Cores : %d\n", nbcore);
-  for(int i=0; i < nbcore+1; i++){
-    if(i==0)
-      printf("CPU_GLOBAL : %lf%%\n", percentage[i]);
-    printf("CPU%d : %lf%%\n", i, percentage[i]);
-  }
 
-    ret = write(sock, (void *)percentage, sizeof(double));
+    printf("NB Cores : %d\nCPU_GLOBAL : %lf%%\n", nbcore, percentage[0]);
+    for(int i=1; i < nbcore+1; i++)
+      printf("CPU%d : %lf%%\n", i, percentage[i]);
+    
+
+    for(int i=0; i < nbcore+1; i++)
+      ret = write(sock, (void *)&percentage[i], sizeof(double));
 
     sleep(2);
     ret=system("clear");
