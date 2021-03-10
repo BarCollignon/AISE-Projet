@@ -1,34 +1,17 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h> 
-#include <string.h> 
+#include <stdlib.h>
+#include <string.h>
 
-#include <netdb.h> 
+#include <netdb.h>
 #include <netinet/in.h>
 
-#include <sys/socket.h> 
-
-
-struct stats{
-  char cpu[4];
-  int user;
-  int nice;
-  int system;
-  int idle;
-  int iowait;
-  int irq;
-  int softirq;
-  int steal;
-  int guest;
-  int guest_nice;
-}; 
-
-
-
+#include <sys/socket.h>
+#include "libclient.h"
 
 //
 int main(int argc, char **argv){
- 
+
   if(argc < 3)
     return 1;
 
@@ -76,11 +59,11 @@ int main(int argc, char **argv){
     return 1;
   }
 
-  printf("connected to the server..\n"); 
-  
+  printf("connected to the server..\n");
 
-/// STAT  
-  
+
+/// STAT
+
   int zero,nbcore;
   FILE *fd=fopen("/sys/devices/system/cpu/present","r");
   if(!fd)
@@ -89,10 +72,10 @@ int main(int argc, char **argv){
   ret = fscanf(fd, "%d-%d", &zero, &nbcore);
   if(ret!=2)
     perror("fscanf");
-  
+
   nbcore++;
   ret = write(sock, (void *)&nbcore, sizeof(int));
-  
+
   int prevIdle, currIdle, prevNonIdle, currNonIdle, prevTotal, currTotal, total, idled;
 
   //nbcore + 1 for CPU Global
@@ -152,7 +135,7 @@ int main(int argc, char **argv){
     printf("NB Cores : %d\nCPU_GLOBAL : %lf%%\n", nbcore, percentage[0]);
     for(int i=1; i < nbcore+1; i++)
       printf("CPU%d : %lf%%\n", i, percentage[i]);
-    
+
 
     for(int i=0; i < nbcore+1; i++)
       ret = write(sock, (void *)&percentage[i], sizeof(double));
@@ -164,5 +147,4 @@ int main(int argc, char **argv){
 
   close(sock);
   return 0;
-} 
-
+}
