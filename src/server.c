@@ -70,27 +70,12 @@ int main(int argc, char **argv){
     printf("Server listening..\n");
   }
 
-  struct sockaddr client_info;
-  socklen_t addr_len;
+  pthread_t th;
 
-  while(1){
-    int cs = accept( listen_sock, &client_info, &addr_len );
-    fprintf( stderr, "Client accept\n");
+  pthread_create(&th, NULL, accept_loop, (void *)&listen_sock);
 
-    if(cs < 0){
-      perror("accept");
-      return 1;
-    }
-
-    int *client_socket = (int *)malloc(sizeof(int));
-
-    *client_socket = cs;
-
-    pthread_t th;
-
-    pthread_create(&th, NULL, client_loop, (void *)client_socket);
-  }
-
+  pthread_join(th, NULL);
+  
 
   close(listen_sock);
   return 0;

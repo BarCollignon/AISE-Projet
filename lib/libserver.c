@@ -12,6 +12,32 @@
 #include<pthread.h>
 #include "libserver.h"
 
+void *accept_loop( void *param ){
+
+  int *listen_sock = (int *)param;
+
+  struct sockaddr client_info;
+  socklen_t addr_len;
+
+  while(1){
+    int cs = accept( *listen_sock, &client_info, &addr_len );
+
+    if(cs < 0){
+      perror("accept");
+      continue;
+    }
+
+    int *client_socket = (int *)malloc(sizeof(int));
+
+    *client_socket = cs;
+
+    pthread_t th;
+
+    pthread_create(&th, NULL, client_loop, (void *)client_socket);
+  }
+
+}
+
 void *client_loop( void *param ){
 
   int *client_socket=(int *)param;
