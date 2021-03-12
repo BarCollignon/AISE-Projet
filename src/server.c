@@ -70,9 +70,26 @@ int main(int argc, char **argv){
     printf("Server listening..\n");
   }
 
+  sock_data_t sock_data;
+  sock_data.listen_sock=listen_sock;
+  sock_data.nbclient=0;
+  sock_data.client_data=NULL;
+
   pthread_t th;
 
-  pthread_create(&th, NULL, accept_loop, (void *)&listen_sock);
+  pthread_create(&th, NULL, accept_loop, (void *)&sock_data);
+
+  while(1){
+    ret=system("clear");
+    for(int n=0; n < sock_data.nbclient; n++){
+      printf("[%d]NB Cores : %d\n", sock_data.client_data[n].client_socket-3, sock_data.client_data[n].nbcore);
+      printf("CPU_GLOBAL : %lf%%\n", sock_data.client_data[n].percentages[0]);
+      for(int i=1; i < sock_data.client_data[n].nbcore+1; i++)
+        printf("CPU%d : %lf%%\n", i, sock_data.client_data[n].percentages[i]);
+    }
+
+    sleep(2);
+  }
 
   pthread_join(th, NULL);
   
