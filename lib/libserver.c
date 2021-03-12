@@ -50,9 +50,17 @@ void *client_loop( void *param ){
   client_data->percentages=(double *)malloc((client_data->nbcore+1)*sizeof(double));
 
   while(1){
-    for(int i=0; i < client_data->nbcore+1; i++)
+    for(int i=0; i < client_data->nbcore+1; i++){
       ret=read(client_data->client_socket, (void *)&client_data->percentages[i], sizeof(double));
+      if(ret<=0)
+        perror("read");
+    }
 
+    ret=read(client_data->client_socket, (void *)&client_data->mem_total, sizeof(int));
+    if(ret<=0)
+      perror("read");
+    
+    ret=read(client_data->client_socket, (void *)&client_data->mem_available, sizeof(int));
     if(ret<=0)
       perror("read");
     

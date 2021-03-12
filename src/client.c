@@ -131,14 +131,38 @@ int main(int argc, char **argv){
       percentage[i] *= 10000;
     }
 
+// STAT MEMORY
+
+    int mem_total, mem_available;
+
+    fd=fopen("/proc/meminfo","r");
+    if(!fd)
+      return 1;
+
+    ret = fscanf(fd,"MemTotal: %d kB\n", &mem_total);
+    if(ret!=1)
+      perror("fscanf");
+    ret = fscanf(fd,"MemFree: %d kB\n", &mem_available);	//Skip MemFree info
+    if(ret!=1)
+      perror("fscanf");
+    ret = fscanf(fd,"MemAvailable: %d kB\n", &mem_available);
+    if(ret!=1)
+      perror("fscanf");
+    fclose(fd);
+
 
     printf("NB Cores : %d\nCPU_GLOBAL : %lf%%\n", nbcore, percentage[0]);
     for(int i=1; i < nbcore+1; i++)
       printf("CPU%d : %lf%%\n", i, percentage[i]);
+    printf("MemTotal: %d kB\n", mem_total);
+    printf("MemAvailable: %d kB\n", mem_available);
 
+// SEND STATS 
 
     for(int i=0; i < nbcore+1; i++)
-      ret = write(sock, (void *)&percentage[i], sizeof(double));
+      ret = write(sock, (void *)&percentage[i], sizeof(double));	//Send all %cpu
+    ret = write(sock, (void *)&mem_total, sizeof(int));			//Send Mem Total
+    ret = write(sock, (void *)&mem_available, sizeof(int));		//Send Mem Available
 
     sleep(2);
     ret=system("clear");

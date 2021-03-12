@@ -82,10 +82,12 @@ int main(int argc, char **argv){
   while(1){
     ret=system("clear");
     for(int n=0; n < sock_data.nbclient; n++){
-      printf("[%d]NB Cores : %d\n", sock_data.client_data[n].client_socket-3, sock_data.client_data[n].nbcore);
-      printf("CPU_GLOBAL : %lf%%\n", sock_data.client_data[n].percentages[0]);
+      printf("[%d]NB Cores : \t%d\n", sock_data.client_data[n].client_socket-3, sock_data.client_data[n].nbcore);
+      printf("CPU_GLOBAL : \t%lf %%\n", sock_data.client_data[n].percentages[0]);
       for(int i=1; i < sock_data.client_data[n].nbcore+1; i++)
-        printf("CPU%d : %lf%%\n", i, sock_data.client_data[n].percentages[i]);
+        printf("CPU%d : \t\t%lf %%\n", i, sock_data.client_data[n].percentages[i]);
+      printf("MemTotal: \t%d kB\n", sock_data.client_data[n].mem_total);
+      printf("MemAvailable: \t%d kB\n", sock_data.client_data[n].mem_available);
     }
 
     sleep(2);

@@ -5,7 +5,8 @@ struct data_s{
   int client_socket;
   int nbcore;
   double *percentages;
-  int memavailable;
+  int mem_total;
+  int mem_available;
 };
 
 typedef struct data_s data_t;
