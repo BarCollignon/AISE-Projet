@@ -32,7 +32,10 @@ Exemple :
 * A2, Communication entre capteur et interface
 * A3, Premier capteur (CPU)
 * A4, Premiere interface
+* A5, Rapport
 
 ### Partie 2
 * B2, Multi client
+* B5, Interactivité, redimensionnement de la fenêtre
+* B6, GUI enrichi, ncurses
 
