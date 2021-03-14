@@ -11,6 +11,7 @@ Tout un systeme de build a ete fait.
 Notre projet est compilable avec make.
 
 Pour compiler tout le projet:
+
 	% make
 
 # Execution
@@ -18,11 +19,13 @@ Pour compiler tout le projet:
 Il faut d'abord lancer la partie server, interface, qui va attendre des clients.
 Il prend comme seul argument le port sur lequel la socket va s'ouvrir.
 Par exemple :
+
 	% ./bin/server 8080
 
 La partie client quand a elle prend deux arguments.
 Le premier etant l'adresse ip et le second le port de la socket a laquelle on veux se connecter.
 Exemple :
+
 	% ./bin/client localhost 8080
 
 # Liste des fonctionnalites
