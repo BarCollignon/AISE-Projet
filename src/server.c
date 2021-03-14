@@ -10,6 +10,9 @@
 #include<sys/types.h>
 
 #include<pthread.h>
+
+#include<ncurses.h>
+
 #include "libserver.h"
 //
 int main(int argc, char **argv){
@@ -79,23 +82,47 @@ int main(int argc, char **argv){
 
   pthread_create(&th, NULL, accept_loop, (void *)&sock_data);
 
+  WINDOW *left, *right;
+    
+  initscr();
+  curs_set(FALSE);
+  
   while(1){
-    ret=system("clear");
+    left = subwin(stdscr, LINES, COLS/2, 0, 0);
+    right = subwin(stdscr, LINES, COLS/2, 0, COLS/2);
+    werase(left);
+    werase(right);
+
     for(int n=0; n < sock_data.nbclient; n++){
-      printf("[%d]NB Cores : \t%d\n", sock_data.client_data[n].client_socket-3, sock_data.client_data[n].nbcore);
-      printf("CPU_GLOBAL : \t%lf %%\n", sock_data.client_data[n].percentages[0]);
-      for(int i=1; i < sock_data.client_data[n].nbcore+1; i++)
-        printf("CPU%d : \t\t%lf %%\n", i, sock_data.client_data[n].percentages[i]);
-      printf("MemTotal: \t%d kB\n", sock_data.client_data[n].mem_total);
-      printf("MemAvailable: \t%d kB\n", sock_data.client_data[n].mem_available);
+      if(n%2==0){
+        wprintw(left, "\tMonitoring client %d\n", sock_data.client_data[n].client_socket-3);
+        wprintw(left,"NB Cores : \t%d\n", sock_data.client_data[n].nbcore);
+        wprintw(left,"CPU_GLOBAL : \t%lf %%\n", sock_data.client_data[n].percentages[0]);
+        for(int i=1; i < sock_data.client_data[n].nbcore+1; i++)
+          wprintw(left,"CPU%d : \t\t%lf %%\n", i, sock_data.client_data[n].percentages[i]);
+        wprintw(left,"MemTotal: \t%d kB\n", sock_data.client_data[n].mem_total);
+        wprintw(left,"MemAvailable: \t%d kB\n\n", sock_data.client_data[n].mem_available);
+      }else{
+        wprintw(right, "\tMonitoring client %d\n", sock_data.client_data[n].client_socket-3);
+        wprintw(right,"NB Cores : \t%d\n", sock_data.client_data[n].nbcore);
+        wprintw(right,"CPU_GLOBAL : \t%lf %%\n", sock_data.client_data[n].percentages[0]);
+        for(int i=1; i < sock_data.client_data[n].nbcore+1; i++)
+          wprintw(right,"CPU%d : \t\t%lf %%\n", i, sock_data.client_data[n].percentages[i]);
+        wprintw(right,"MemTotal: \t%d kB\n", sock_data.client_data[n].mem_total);
+        wprintw(right,"MemAvailable: \t%d kB\n\n", sock_data.client_data[n].mem_available);
+      }
     }
+
+    wrefresh(left);
+    wrefresh(right);
 
     sleep(2);
   }
 
+  endwin();
+
   pthread_join(th, NULL);
   
-
   close(listen_sock);
   return 0;
 }

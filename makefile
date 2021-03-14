@@ -10,7 +10,7 @@ clean : cleanmaster
 
 #Binaries
 ./bin/server: ./src/server.c ./lib/libServer.a
-	$(CC) $< -I$(INCLUDE) -L./lib/ -lServer -o $@ $(CFLAGS) -lpthread
+	$(CC) $< -I$(INCLUDE) -L./lib/ -lServer -o $@ $(CFLAGS) -lpthread -lncurses
 
 ./bin/client: ./src/client.c ./lib/libClient.a
 	$(CC) $< -I$(INCLUDE) -L./lib/ -lClient -o $@ $(CFLAGS)
